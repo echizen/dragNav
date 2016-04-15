@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+  <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <title>DragNav demo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" media="(device-height: 568px)">
+
+    <style type="text/css">
+      * {
+        padding: 0;
+        margin: 0;
+        border: 0;
+      }
+
+      body {
+        background: #eee;
+        font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: relative;
+      }
+
+      .wrap{
+        background: #333333;
+      }
+
+      .item-list{
+        line-height: 1;
+        height: 1rem;
+        white-space: nowrap;
+        width: 2000px;/*attention:initial width must exist*/
+      }
+
+      .item,.placeholder{
+        color: #FF5A78;
+        height: 1rem;
+        width: 1.5rem;
+        text-align: center;
+        line-height: 1rem;
+        font-size: 0.28rem;
+        vertical-align: top;
+        float: left;
+      }
+
+      .date-flag{
+        background-color: #ff5a78;
+        color: #fff;
+        font-size: .32rem;
+        line-height: .36rem;
+        height: 0.68rem;
+        width: .4rem;
+        padding: .16rem .21rem;
+        display: block;
+        white-space: normal;
+        text-align: center;
+        vertical-align: top;
+        position: relative;
+        float: left;
+      }
+
+      .active-arrow{
+        position: absolute;
+        z-index: 20;
+        height: 0.08rem;
+        bottom: 0px;
+        left: 40%;
+        right: 40%;
+        background-color: #FF5A78;
+      }
+
+      .center:after {
+        content: " ";
+        width: 0;
+        height: 0;
+        border: 0.09rem solid transparent;
+        border-bottom-color: #FF5A78;
+        position: absolute;
+        left: 50%;
+        bottom: 0.08rem;
+        transform: translateX(-50%);
+        -webkit-transform: translateX(-50%);
+      }
+
+    </style>
+  </head>
+
+  <body>
+
+    <div class="wrap" id="wrap">
+      <div class="item-list" id="itemList">
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+      </div>
+    </div>
+
+    <div class="active-arrow"> <div class="center"></div> </div>
+
+    <script type="text/javascript" src="../lib/jquery-2.2.3.min.js"></script>
+    <script src="../dist/DragNav.js"></script>
+    <script type="text/javascript">
+      var size = 100,
+          documentElement = window.document.documentElement,
+          width = Math.min(documentElement.clientWidth, 750);
+      documentElement.style.fontSize = width / (750 / size) + "px";
+
+      var $item,
+          navItemWidth;
+
+      $(document).ready(function() {
+        var itemLength = 24;
+        var item = '<div class="placeholder">占位</div><div class="placeholder">开始</div>';
+        for(var i = 0 ; i<=itemLength ; i=i+3){
+          if(i==0||i==6||i==12||i==18){
+            item += '<div class="date-flag">'+i+'日</div>';
+          }
+          item += '<div class="item">'+i+':00</div>';
+          
+        }
+        item += '<div class="placeholder">占位</div><div class="placeholder">结束</div>';
+        $('#itemList').html(item);
+
+        $item = $('.item');
+        navItemWidth = $item.width();
+
+        var getNodePosition = function(){
+        var 
+          len = $item.length,
+          navRange = [],
+          navboxWidth = $('.wrap').width();
+          $item.map(function(index,item){
+            navRange.push(item.offsetLeft - navboxWidth/2 + navItemWidth/2);
+          })
+          return navRange;
+        }
+
+        // dragNav
+        $("#wrap").dragNav({
+          pageClass:'item',
+          pageContainer:'.item-list',
+          itemWidth: navItemWidth,
+          itemBorder:getNodePosition()
+        });
+      })
+      
+    </script>
+
+  </body>
+
+</html>

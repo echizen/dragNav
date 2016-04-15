@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+  <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <title>DragNav demo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" media="(device-height: 568px)">
+
+    <style type="text/css">
+      * {
+        padding: 0;
+        margin: 0;
+        border: 0;
+      }
+
+      body {
+        background: #eee;
+        font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: relative;
+      }
+
+      .wrap{
+        background: #333333;
+      }
+
+      .item-list{
+        line-height: 1;
+        height: 1rem;
+        white-space: nowrap;
+        width: 2000px;/*attention:initial width must exist*/
+      }
+
+      .item,.placeholder{
+        color: #FF5A78;
+        height: 1rem;
+        width: 1.5rem;
+        text-align: center;
+        line-height: 1rem;
+        font-size: 0.28rem;
+        vertical-align: top;
+        float: left;
+      }
+
+      .active-arrow{
+        position: absolute;
+        z-index: 20;
+        height: 0.08rem;
+        bottom: 0px;
+        left: 40%;
+        right: 40%;
+        background-color: #FF5A78;
+      }
+
+      .center:after {
+        content: " ";
+        width: 0;
+        height: 0;
+        border: 0.09rem solid transparent;
+        border-bottom-color: #FF5A78;
+        position: absolute;
+        left: 50%;
+        bottom: 0.08rem;
+        transform: translateX(-50%);
+        -webkit-transform: translateX(-50%);
+      }
+
+    </style>
+  </head>
+
+  <body>
+
+    <div class="wrap" id="wrap">
+      <div class="item-list" id="itemList">
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+        <div class="item">10:00</div>
+      </div>
+    </div>
+
+    <div class="active-arrow"> <div class="center"></div> </div>
+
+    <script type="text/javascript" src="../lib/jquery-2.2.3.min.js"></script>
+    <script src="../dist/DragNav.js"></script>
+    <script type="text/javascript">
+      var size = 100,
+          documentElement = window.document.documentElement,
+          width = Math.min(documentElement.clientWidth, 750);
+      documentElement.style.fontSize = width / (750 / size) + "px";
+
+      $(document).ready(function() {
+        var itemLength = 24;
+        var item = '';
+        var item = '<div class="placeholder">占位</div><div class="placeholder">开始</div>';
+        for(var i = 0 ; i<=itemLength ; i++){
+          item += '<div class="item">'+i+':00</div>';
+        }
+        item += '<div class="placeholder">占位</div><div class="placeholder">结束</div>';
+        $('#itemList').html(item);
+
+        // dragNav
+        $("#wrap").dragNav({
+          pageClass:'item',
+          pageContainer:'.item-list',
+          itemWidth: $('.item').width()
+        });
+      })
+      
+    </script>
+
+  </body>
+
+</html>
