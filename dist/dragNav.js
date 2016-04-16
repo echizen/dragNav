@@ -99,13 +99,14 @@ if (!Array.prototype.find) {
     // * afterInitialize called after the pages are size
     // * preventDrag if want to prevent user interactions and only swipe manualy
     // * itemBorder: item left border
-    // * itemWidth
+    // * itemWidth:
+    // * wrapBorder: wrap height ander width
     
       // Default setting
     var  defaultSettings = {
         pageClass          : "dragNav-page",
         pageContainer      : document.querySelector(".container"),
-        minDragDistance    : "40",
+        minDragDistance    : "10",
         onSwipeStart       : noop,
         onSwipeEnd         : noop,
         onDragStart        : noop,
@@ -119,7 +120,8 @@ if (!Array.prototype.find) {
         borderBetweenPages : 0,
         duration           : 300,
         itemBorder         : [],
-        itemWidth          : null 
+        itemWidth          : null ,
+        wrapBorder         : window.document.documentElement.clientWidth
       },
 
       isTouch = 'ontouchstart' in win,
@@ -168,11 +170,32 @@ if (!Array.prototype.find) {
 
     function setStyles( element, styles ) {
 
-      window.requestAnimationFrame(function(){
-        $(element).css(styles);
-      })
-      return element;
+      var property,
+          value;
 
+      if($){
+        window.requestAnimationFrame(function(){
+          $(element).css(styles);
+        })
+      }else{
+        for ( property in styles ) {
+          if ( styles.hasOwnProperty(property) ) {
+            value = styles[property];
+
+            switch ( property ) {
+              case "height":
+              case "width":
+              case "marginLeft":
+              case "marginTop":
+                value += "px";
+            }
+            window.requestAnimationFrame(function(){
+              element.style[property] = value;
+            })  
+          }
+        }
+      }
+      return element;
     }
 
     function extend( destination, source ) {
@@ -249,9 +272,8 @@ if (!Array.prototype.find) {
         margin: 0
       };
       if(!this.settings.itemWidth){
-        this.settings.itemWidth = document.querySelector(this.settings.pageClass);
+        this.settings.itemWidth = document.querySelector(this.settings.pageClass).clientWidth;
       }
-
       // bind events
       this._onStart = proxy( this._onStart, this );
       this._onMove = proxy( this._onMove, this );
@@ -263,7 +285,6 @@ if (!Array.prototype.find) {
       this._animateScroll = supportTransform ? this._animateScrollWithTransform : this._animateScrollWithoutTransform;
 
       // Initialization
-
       setStyles(container, containerStyles);
 
       this.updateInstance( settings,true );
@@ -306,37 +327,22 @@ if (!Array.prototype.find) {
         };
 
         var itemBorder = this.settings.itemBorder;
-
+        // console.log(x - this.scrollBorder.x);
         switch ( direction ) {
 
           case "right":
-            if(itemBorder&&itemBorder.length){
-              if ( this.scrollBorder.x <= itemBorder[0] ) {
-                coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
-                return coordinates;
-              }
-            }else{
-              if ( this.scrollBorder.x <=0 ) {
-                coordinates.x = Math.round(-this.scrollBorder.x +x / 5 );
-                return coordinates;
-              }
+            if ( x + this.scrollBorder.x >= itemBorder[0] ) {
+              coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
+              return coordinates;
             }
             break;
 
           case "left":
             // scroll after right border
-            if(itemBorder&&itemBorder.length){
-              if ( itemBorder[itemBorder.length-1] <= this.scrollBorder.x ) {
-                coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
-                return coordinates;
-              }
-            }else{
-              if ( (this.pagesCount-1 ) * this.pageDimentions.width <= this.scrollBorder.x ) {
-                coordinates.x = Math.round( - Math.ceil(this.pagesCount-1) * (this.pageDimentions.width + this.settings.borderBetweenPages) + x / 5 );
-                return coordinates;
-              }
+            if ( itemBorder[itemBorder.length-1] <= -x + this.scrollBorder.x ) {
+              coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
+              return coordinates;
             }
-            
             break;
         }
 
@@ -405,8 +411,6 @@ if (!Array.prototype.find) {
           // transitionEnd偶尔不发生
           cancelId = setTimeout(cancelPreventScroll,100)
         }
-
-
         
       },
 
@@ -454,7 +458,8 @@ if (!Array.prototype.find) {
         
         return eventData;
       },
-     _setHorizontalContainerCssValues : function() {
+     
+      setContainerCssValues: function(){
         extend( this.pageCssProperties, {
           "cssFloat" : "left",
           "overflowY": "auto",
@@ -465,11 +470,11 @@ if (!Array.prototype.find) {
 
         var containerWidth = 0;
         var borderLen = this.settings.itemBorder && this.settings.itemBorder.length;
-        if(this.settings.itemBorder.length){
-          containerWidth = this.settings.itemBorder[borderLen-1]+$(this.pageContainer).parent().width();
-        }else{
-          containerWidth = (this.pageDimentions.width + this.settings.borderBetweenPages) * this.pagesCount
-        }
+        // if(this.settings.itemBorder.length){
+          containerWidth = this.settings.itemBorder[borderLen-1]+this.settings.wrapBorder;
+        // }else{
+        //   containerWidth = (this.pageDimentions.width + this.settings.borderBetweenPages) * this.pagesCount
+        // }
 
         setStyles(this.pageContainer, {
           "overflow"                   : "hidden",
@@ -480,10 +485,6 @@ if (!Array.prototype.find) {
           "margin"                     : 0,
           "padding"                    : 0
         });
-      },
-
-      setContainerCssValues: function(){
-        this._setHorizontalContainerCssValues();
       },
 
       // ### Calculate page dimentions
@@ -596,36 +597,41 @@ if (!Array.prototype.find) {
                 getScrollBorder();
               }
               break;
+
+            default:
+              this.scrollBorder.x = 0;
+              this.page           = 0;
+              break;
           }
           return;
         }
 
-        switch ( direction ) {
+        // switch ( direction ) {
 
-          case "left":
-            if ( page < this.pagesCount - 1 ) {
-              this.scrollBorder.x = this.scrollBorder.x + width + borderBetweenPages;
-              this.page++;
-            }
-            break;
+        //   case "left":
+        //     if ( page < this.pagesCount - 1 ) {
+        //       this.scrollBorder.x = this.scrollBorder.x + width + borderBetweenPages;
+        //       this.page++;
+        //     }
+        //     break;
 
-          case "right":
-            if ( page > 0 ) {
-              this.scrollBorder.x = this.scrollBorder.x - width - borderBetweenPages;
-              this.page--;
-            }
-            break;
+        //   case "right":
+        //     if ( page > 0 ) {
+        //       this.scrollBorder.x = this.scrollBorder.x - width - borderBetweenPages;
+        //       this.page--;
+        //     }
+        //     break;
 
-          case "page":  
-            this.scrollBorder.x = (width + borderBetweenPages) * pageNumber;
-            this.page = pageNumber;
-            break;
+        //   case "page":  
+        //     this.scrollBorder.x = (width + borderBetweenPages) * pageNumber;
+        //     this.page = pageNumber;
+        //     break;
 
-          default:
-            this.scrollBorder.x = 0;
-            this.page           = 0;
-            break;
-        }
+        //   default:
+        //     this.scrollBorder.x = 0;
+        //     this.page           = 0;
+        //     break;
+        // }
       },
 
       // ### On swipe end
@@ -781,7 +787,7 @@ if (!Array.prototype.find) {
       },
 
       updateInstance: function( settings,isInit ) {
-
+        var centerFir = 0,tempBorder=0;
         settings = settings || {};
 
         if ( typeof settings === "object" ) extend( this.settings, settings );
@@ -792,6 +798,15 @@ if (!Array.prototype.find) {
           this.pagesCount = this.pages.length;
         } else {
           throw new Error(errors.pages);
+        }
+
+        if(!this.settings.itemBorder.length){
+          centerFir = this.pages[0].offsetLeft + this.settings.itemWidth/2 - this.settings.wrapBorder/2;
+          this.settings.itemBorder.push(centerFir);
+          for (var i = 1; i < this.pagesCount; i++) {
+            tempBorder = centerFir+i*this.settings.itemWidth;
+            this.settings.itemBorder.push(tempBorder);
+          };
         }
 
         this.activeElement = this.pages[this.page * this.settings.itemsInPage];

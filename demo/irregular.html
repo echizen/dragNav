@@ -113,7 +113,7 @@
         var itemLength = 24;
         var item = '<div class="placeholder">占位</div><div class="placeholder">开始</div>';
         for(var i = 0 ; i<=itemLength ; i=i+3){
-          if(i==0||i==6||i==12||i==18){
+          if(i==3||i==6||i==12||i==18){
             item += '<div class="date-flag">'+i+'日</div>';
           }
           item += '<div class="item">'+i+':00</div>';
@@ -126,10 +126,10 @@
         navItemWidth = $item.width();
 
         var getNodePosition = function(){
-        var 
-          len = $item.length,
-          navRange = [],
-          navboxWidth = $('.wrap').width();
+          var 
+            len = $item.length,
+            navRange = [],
+            navboxWidth = $('.wrap').width();
           $item.map(function(index,item){
             navRange.push(item.offsetLeft - navboxWidth/2 + navItemWidth/2);
           })
@@ -141,7 +141,8 @@
           pageClass:'item',
           pageContainer:'.item-list',
           itemWidth: navItemWidth,
-          itemBorder:getNodePosition()
+          itemBorder:getNodePosition(),
+          wrapBorder:$('.wrap').width()
         });
       })
       

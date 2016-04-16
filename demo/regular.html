@@ -34,7 +34,7 @@
       .item,.placeholder{
         color: #FF5A78;
         height: 1rem;
-        width: 1.5rem;
+        width: 1.5rem;/*attention: if width are not interger, it will have offset*/
         text-align: center;
         line-height: 1rem;
         font-size: 0.28rem;
@@ -91,7 +91,7 @@
       documentElement.style.fontSize = width / (750 / size) + "px";
 
       $(document).ready(function() {
-        var itemLength = 24;
+        var itemLength = 23;
         var item = '';
         var item = '<div class="placeholder">占位</div><div class="placeholder">开始</div>';
         for(var i = 0 ; i<=itemLength ; i++){
