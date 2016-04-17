@@ -7,28 +7,29 @@
 
 // requestAnimationFrame polyfill
 (function() {
-    var lastTime = 0;
-    var vendors = ['ms', 'moz', 'webkit', 'o'];
-    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-        window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] 
-                                   || window[vendors[x]+'CancelRequestAnimationFrame'];
-    }
- 
-    if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function(callback, element) {
-            var currTime = new Date().getTime();
-            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function() { callback(currTime + timeToCall); }, 
-              timeToCall);
-            lastTime = currTime + timeToCall;
-            return id;
-        };
- 
-    if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function(id) {
-            clearTimeout(id);
-        };
+  var lastTime = 0;
+  var vendors = ['ms', 'moz', 'webkit', 'o'];
+  for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+  }
+
+  if (!window.requestAnimationFrame)
+    window.requestAnimationFrame = function(callback, element) {
+      var currTime = new Date().getTime();
+      var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+      var id = window.setTimeout(function() {
+          callback(currTime + timeToCall);
+        },
+        timeToCall);
+      lastTime = currTime + timeToCall;
+      return id;
+    };
+
+  if (!window.cancelAnimationFrame)
+    window.cancelAnimationFrame = function(id) {
+      clearTimeout(id);
+    };
 }());
 
 // find polyfill
@@ -62,14 +63,15 @@ if (!Array.prototype.find) {
   });
 }
 
- ;(function( window ) {
+;
+(function(window) {
   "use strict";
 
   // help the minifier
   var doc = document,
-      win = window;
+    win = window;
 
-  function init( $ ) {
+  function init($) {
 
     // =====================
     //
@@ -82,46 +84,36 @@ if (!Array.prototype.find) {
     //
     // You can use the following options:
     //
-    // * pageClass: classname selector for all elments that should provide a page
-    
-    // * minDragDistance: minuimum distance (in pixel) the user has to drag
-    //   to trigger swip
-    // * scribe: pixel value for a possible scribe
+    // * itemClass: classname selector for all elments that should provide a page
+    // * wrap: selector which contain itemClass
     // * onSwipeStart: callback function before the animation
     // * onSwipeEnd: callback function after the animation
     // * onDragStart: called on drag start
     // * onDrag: callback on drag
     // * onDragEnd: callback on dragend
-    // * onScrollStart: callback after scroll start
-    // * borderBetweenPages: if you need space between pages add a pixel value
     // * duration
     // * stopPropagation
     // * afterInitialize called after the pages are size
-    // * preventDrag if want to prevent user interactions and only swipe manualy
     // * itemBorder: item left border
     // * itemWidth:
-    // * wrapBorder: wrap height ander width
-    
-      // Default setting
-    var  defaultSettings = {
-        pageClass          : "dragNav-page",
-        pageContainer      : document.querySelector(".container"),
-        minDragDistance    : "10",
-        onSwipeStart       : noop,
-        onSwipeEnd         : noop,
-        onDragStart        : noop,
-        onDrag             : noop,
-        onDragEnd          : noop,
-        onScrollStart      : noop,
-        afterInitialize    : noop,
-        stopPropagation    : false,
-        itemsInPage        : 1,
-        scribe             : 0,
-        borderBetweenPages : 0,
-        duration           : 300,
-        itemBorder         : [],
-        itemWidth          : null ,
-        wrapBorder         : window.document.documentElement.clientWidth
+    // * wrapBorder: wrap width
+
+    // Default setting
+    var defaultSettings = {
+        itemClass: "dragNav-page",
+        wrap: window.document.documentElement,
+        minDragDistance: "10",
+        onSwipeStart: noop,
+        onSwipeEnd: noop,
+        onDragStart: noop,
+        onDrag: noop,
+        onDragEnd: noop,
+        afterInitialize: noop,
+        stopPropagation: false,
+        duration: 300,
+        itemBorder: [],
+        itemWidth: null,
+        wrapBorder: window.document.documentElement.clientWidth
       },
 
       isTouch = 'ontouchstart' in win,
@@ -136,28 +128,28 @@ if (!Array.prototype.find) {
 
       containerStyles = {
         overflow: "hidden",
-        padding : 0
+        padding: 0
       },
 
       supports = (function() {
-         var div = doc.createElement('div'),
-             vendors = 'Khtml Ms O Moz Webkit'.split(' '),
-             len = vendors.length;
+        var div = doc.createElement('div'),
+          vendors = 'Khtml Ms O Moz Webkit'.split(' '),
+          len = vendors.length;
 
-         return function( prop ) {
-            if ( prop in div.style ) return true;
+        return function(prop) {
+          if (prop in div.style) return true;
 
-            prop = prop.replace(/^[a-z]/, function(val) {
-               return val.toUpperCase();
-            });
+          prop = prop.replace(/^[a-z]/, function(val) {
+            return val.toUpperCase();
+          });
 
-            while( len-- ) {
-               if ( vendors[len] + prop in div.style ) {
-                  return true;
-               }
+          while (len--) {
+            if (vendors[len] + prop in div.style) {
+              return true;
             }
-            return false;
-         };
+          }
+          return false;
+        };
       })(),
 
       supportTransform = supports('transform');
@@ -168,69 +160,66 @@ if (!Array.prototype.find) {
       return false;
     }
 
-    function setStyles( element, styles ) {
+    function setStyles(element, styles) {
 
       var property,
-          value;
+        value;
 
-      if($){
-        window.requestAnimationFrame(function(){
+      if ($) {
+        window.requestAnimationFrame(function() {
           $(element).css(styles);
         })
-      }else{
-        for ( property in styles ) {
-          if ( styles.hasOwnProperty(property) ) {
+      } else {
+        for (property in styles) {
+          if (styles.hasOwnProperty(property)) {
             value = styles[property];
 
-            switch ( property ) {
+            switch (property) {
               case "height":
               case "width":
               case "marginLeft":
               case "marginTop":
                 value += "px";
             }
-            window.requestAnimationFrame(function(){
+            window.requestAnimationFrame(function() {
               element.style[property] = value;
-            })  
+            })
           }
         }
       }
       return element;
     }
 
-    function extend( destination, source ) {
+    function extend(destination, source) {
 
       var property;
-
-      for ( property in source ) {
+      for (property in source) {
         destination[property] = source[property];
       }
-
       return destination;
 
     }
 
-    function proxy( fn, context ) {
+    function proxy(fn, context) {
 
       return function() {
-        return fn.apply( context, Array.prototype.slice.call(arguments) );
+        return fn.apply(context, Array.prototype.slice.call(arguments));
       };
 
     }
 
-    function getElementsByClassName( className, root ) {
+    function getElementsByClassName(className, root) {
       var elements;
 
-      if ( $ ) {
+      if ($) {
         elements = $(root).find("." + className);
       } else {
-        elements = Array.prototype.slice.call(root.getElementsByClassName( className ));
+        elements = Array.prototype.slice.call(root.getElementsByClassName(className));
       }
-
       return elements;
     }
 
-    function animate( element, propery, to, speed, callback ) {
+    function animate(element, propery, to, speed, callback) {
       var propertyObj = {};
 
       propertyObj[propery] = to;
@@ -251,34 +240,37 @@ if (!Array.prototype.find) {
     function getCoords(event) {
       // touch move and touch end have different touch data
       var touches = event.touches,
-          data = touches && touches.length ? touches : event.changedTouches;
+        data = touches && touches.length ? touches : event.changedTouches;
 
       return {
         x: isTouch ? data[0].pageX : event.pageX
       };
     }
 
-    function dragNav( container, settings ) {
-      var defaultSettingsCopy = extend( {}, defaultSettings );
+    function dragNav(container, settings) {
+      var defaultSettingsCopy = extend({}, defaultSettings);
+      var centerFir = 0,
+        tempBorder = 0;
 
-      this.settings      = extend( defaultSettingsCopy, settings );
-      this.container     = container;
-      // this.pageContainer = doc.createElement( "div" );
-      this.pageContainer = settings.pageContainer;
-      this.scrollBorder  = { x: 0 };//record active ele border
-      this.page          = 0;
+      this.settings = extend(defaultSettingsCopy, settings);
+      this.container = container;
+      this.wrap = settings.wrap;
+      this.scrollBorder = {
+        x: 0
+      }; //record active ele border
+      this.page = 0;
       this.preventScroll = false;
       this.pageCssProperties = {
         margin: 0
       };
-      if(!this.settings.itemWidth){
-        this.settings.itemWidth = document.querySelector(this.settings.pageClass).clientWidth;
+      if (!this.settings.itemWidth) {
+        this.settings.itemWidth = document.querySelector(this.settings.itemClass).clientWidth;
       }
       // bind events
-      this._onStart = proxy( this._onStart, this );
-      this._onMove = proxy( this._onMove, this );
-      this._onEnd = proxy( this._onEnd, this );
-      this._sizePages = proxy( this._sizePages, this );
+      this._onStart = proxy(this._onStart, this);
+      this._onMove = proxy(this._onMove, this);
+      this._onEnd = proxy(this._onEnd, this);
+      this._sizePages = proxy(this._sizePages, this);
       this._afterScrollTransform = proxy(this._afterScrollTransform, this);
 
       this._scroll = supportTransform ? this._scrollWithTransform : this._scrollWithoutTransform;
@@ -287,10 +279,25 @@ if (!Array.prototype.find) {
       // Initialization
       setStyles(container, containerStyles);
 
-      this.updateInstance( settings,true );
-      if (!this.settings.preventDrag) {
-        this._observe();
+      this.pages = getElementsByClassName(this.settings.itemClass, this.wrap);
+
+      if (this.pages.length) {
+        this.pagesCount = this.pages.length;
+      } else {
+        throw new Error(errors.pages);
       }
+
+      if (!this.settings.itemBorder.length) {
+        centerFir = this.pages[0].offsetLeft + this.settings.itemWidth / 2 - this.settings.wrapBorder / 2;
+        this.settings.itemBorder.push(centerFir);
+        for (var i = 1; i < this.pagesCount; i++) {
+          tempBorder = centerFir + i * this.settings.itemWidth;
+          this.settings.itemBorder.push(tempBorder);
+        };
+      }
+
+      this.updateInstance(settings, true);
+      this._observe();
       this.settings.afterInitialize.call(this);
     }
 
@@ -320,27 +327,27 @@ if (!Array.prototype.find) {
       // calculate real scrcolling distance
       // x: moved x distance
       // y: moved y distance
-      _checkOverscroll: function( direction, x ) {
+      _checkOverscroll: function(direction, x) {
         var coordinates = {
           x: x,
           overscroll: true
         };
 
         var itemBorder = this.settings.itemBorder;
-        // console.log(x - this.scrollBorder.x);
-        switch ( direction ) {
+
+        switch (direction) {
 
           case "right":
-            if ( x + this.scrollBorder.x >= itemBorder[0] ) {
-              coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
+            if (x + this.scrollBorder.x >= itemBorder[0]) {
+              coordinates.x = Math.round(-this.scrollBorder.x + x / 5);
               return coordinates;
             }
             break;
 
           case "left":
             // scroll after right border
-            if ( itemBorder[itemBorder.length-1] <= -x + this.scrollBorder.x ) {
-              coordinates.x = Math.round( - this.scrollBorder.x + x / 5 );
+            if (itemBorder[itemBorder.length - 1] <= -x + this.scrollBorder.x) {
+              coordinates.x = Math.round(-this.scrollBorder.x + x / 5);
               return coordinates;
             }
             break;
@@ -377,44 +384,44 @@ if (!Array.prototype.find) {
 
         this.startCoords = getCoords(event); // for performance , store start coords
 
-        this.settings.onDragStart.call( this, event );
+        this.settings.onDragStart.call(this, event);
 
       },
 
-      _onMove: function( event ) {
+      _onMove: function(event) {
         var cancelId;
-        var cancelPreventScroll = function(){
+        var cancelPreventScroll = function() {
           this.preventScroll = false;
           clearTimeout(cancelId);
         };
-        cancelPreventScroll = proxy(cancelPreventScroll,this);
+        cancelPreventScroll = proxy(cancelPreventScroll, this);
 
         event = event.originalEvent || event;
 
         // ensure swiping with one touch and not pinching
-        if ( event.touches && event.touches.length > 1 || event.scale && event.scale !== 1) return;
+        if (event.touches && event.touches.length > 1 || event.scale && event.scale !== 1) return;
 
         event.preventDefault();
         if (this.settings.stopPropagation) {
           event.stopPropagation();
         }
 
-        var parsedEvent = this._parseEvent(event),//get direction and move distance
-            coordinates = this._checkOverscroll( parsedEvent.direction , - parsedEvent.distanceX);
+        var parsedEvent = this._parseEvent(event), //get direction and move distance
+          coordinates = this._checkOverscroll(parsedEvent.direction, -parsedEvent.distanceX);
 
-        this.settings.onDrag.call( this, this.activeElement, parsedEvent, coordinates.overscroll, event );
+        this.settings.onDrag.call(this, this.activeElement, parsedEvent, coordinates.overscroll, event);
 
-        if ( !this.preventScroll ) {
+        if (!this.preventScroll) {
           this.coordinates = coordinates;
-          this._scroll( coordinates );
-        }else{
+          this._scroll(coordinates);
+        } else {
           // transitionEnd偶尔不发生
-          cancelId = setTimeout(cancelPreventScroll,100)
+          cancelId = setTimeout(cancelPreventScroll, 100)
         }
-        
+
       },
 
-      _onEnd: function( event ) {
+      _onEnd: function(event) {
 
         event = event.originalEvent || event;
 
@@ -424,88 +431,65 @@ if (!Array.prototype.find) {
 
         var parsedEvent = this._parseEvent(event);
 
-        this.startCoords = { x: 0 };
-        
-        if ( Math.abs(parsedEvent.distanceX) > this.settings.minDragDistance) {
+        this.startCoords = {
+          x: 0
+        };
+
+        if (Math.abs(parsedEvent.distanceX) > this.settings.minDragDistance) {
           // for call swipe callback before scroll occur and scroll over complete item
-          this.swipe( parsedEvent.direction );
+          this.swipe(parsedEvent.direction);
         } else if (parsedEvent.distanceX > 0) {
-          // scroll a little to after touch
+          // scroll a little to after touch,no _calcNewPage
           this._scrollToPage();
         }
 
-        this.settings.onDragEnd.call( this, this.container, this.activeElement, this.page, event );
+        this.settings.onDragEnd.call(this, this.container, this.activeElement, this.page, event);
 
         removeEventListener(doc.body, moveEvent, this._onMove);
         removeEventListener(doc.body, endEvent, this._onEnd);
 
       },
 
-      _parseEvent: function( event ) {
-        var coords = getCoords(event),//touch coordinates
-            x = this.startCoords.x - coords.x;// moved distance
+      _parseEvent: function(event) {
+        var coords = getCoords(event), //touch coordinates
+          x = this.startCoords.x - coords.x; // moved distance
 
-        return this._addDistanceValues( x);//add direction
+        return this._addDistanceValues(x); //add direction
       },
 
-      _addDistanceValues: function( x ) {
+      _addDistanceValues: function(x) {
         var eventData = {
           distanceX: 0
         };
 
         eventData.distanceX = x;
         eventData.direction = x > 0 ? "left" : "right";
-        
+
         return eventData;
       },
-     
-      setContainerCssValues: function(){
-        extend( this.pageCssProperties, {
-          "cssFloat" : "left",
+
+      setContainerCssValues: function() {
+        extend(this.pageCssProperties, {
+          "cssFloat": "left",
           "overflowY": "auto",
           "overflowX": "hidden",
-          "padding"  : 0,
-          // "display"  : "block"
+          "padding": 0,
+          "display": "block"
         });
 
         var containerWidth = 0;
         var borderLen = this.settings.itemBorder && this.settings.itemBorder.length;
-        // if(this.settings.itemBorder.length){
-          containerWidth = this.settings.itemBorder[borderLen-1]+this.settings.wrapBorder;
-        // }else{
-        //   containerWidth = (this.pageDimentions.width + this.settings.borderBetweenPages) * this.pagesCount
-        // }
+        containerWidth = this.settings.itemBorder[borderLen - 1] + this.settings.wrapBorder;
 
-        setStyles(this.pageContainer, {
-          "overflow"                   : "hidden",
-          "width"                      : containerWidth,
-          "boxSizing"                  : "content-box",
+        setStyles(this.wrap, {
+          "overflow": "hidden",
+          "width": containerWidth,
+          "boxSizing": "content-box",
           "-webkit-backface-visibility": "hidden",
-          "-webkit-perspective"        : 1000,
-          "margin"                     : 0,
-          "padding"                    : 0
+          "-webkit-perspective": 1000,
+          "margin": 0,
+          "padding": 0
         });
-      },
-
-      // ### Calculate page dimentions
-      // Updates the page dimentions values
-
-      _setPageDimentions: function() {
-        var width  = this.container.offsetWidth,
-            height = this.container.offsetHeight;
-
-        width = width - parseInt( this.settings.scribe, 10 );
-
-        this.pageDimentions = {
-          width : this.settings.itemWidth,
-          height: height
-        };
-
-        this.coordinates = {
-          x : 0,
-          overscroll : true
-        }
-
       },
 
       // ### Size pages
@@ -514,7 +498,10 @@ if (!Array.prototype.find) {
 
         var pagesCount = this.pages.length;
 
-        this._setPageDimentions();
+        this.coordinates = {
+          x: 0,
+          overscroll: true
+        }
 
         this.setContainerCssValues();
 
@@ -522,7 +509,7 @@ if (!Array.prototype.find) {
           setStyles(this.pages[i], this.pageCssProperties);
         }
 
-        this._jumpToPage( "page", this.page );
+        this._jumpToPage("page", this.page);
 
       },
 
@@ -532,106 +519,74 @@ if (!Array.prototype.find) {
       //
       // Takes direction and, if specific page is used the pagenumber
 
-      _calcNewPage: function( direction, pageNumber ) {
+      _calcNewPage: function(direction, pageNumber) {
 
-        var borderBetweenPages = this.settings.borderBetweenPages,
-            // height = this.itemDimentions.height,
-            // width = this.itemDimentions.width,
-            height = this.pageDimentions.height,
-            width = this.pageDimentions.width,
-            page = this.page,
-            irregularBorder = this.settings.itemBorder,
-            irregularBorderLen = irregularBorder.length,
-            absCoordinatesX = Math.abs(this.coordinates.x),
-            leftDis,rightDis;
+        var page = this.page,
+          border = this.settings.itemBorder,
+          borderLen = border.length,
+          absCoordinatesX = Math.abs(this.coordinates.x),
+          leftDis, rightDis;
 
-        var getScrollBorder = function(){
-            if(this.coordinates.x>0 || absCoordinatesX<irregularBorder[0]){
-              this.scrollBorder.x = irregularBorder[0];
-              this.page = 0;
-              
+        var getScrollBorder = function() {
+          if (this.coordinates.x > 0 || absCoordinatesX < border[0]) {
+            this.scrollBorder.x = border[0];
+            this.page = 0;
 
-            }else if(absCoordinatesX>irregularBorder[irregularBorderLen-1]){
-              this.scrollBorder.x = irregularBorder[irregularBorderLen-1];
-              this.page = irregularBorderLen-1;
 
-            }else{
-              for(var i=0 ; i< irregularBorder.length ;i++){
+          } else if (absCoordinatesX > border[borderLen - 1]) {
+            this.scrollBorder.x = border[borderLen - 1];
+            this.page = borderLen - 1;
 
-                leftDis = absCoordinatesX - irregularBorder[i]; 
-                rightDis = irregularBorder[i+1] - absCoordinatesX;
+          } else {
+            for (var i = 0; i < border.length; i++) {
 
-                if( leftDis>0 && rightDis>0 ){
-                  if(leftDis - rightDis>0){
-                    this.scrollBorder.x = irregularBorder[i+1];
-                    this.page = i+1;
-                    break;
-                  }else{
-                    this.scrollBorder.x = irregularBorder[i];
-                    this.page = i;
-                    break;
-                  }
+              leftDis = absCoordinatesX - border[i];
+              rightDis = border[i + 1] - absCoordinatesX;
+
+              if (leftDis > 0 && rightDis > 0) {
+                if (leftDis - rightDis > 0) {
+                  this.scrollBorder.x = border[i + 1];
+                  this.page = i + 1;
+                  break;
+                } else {
+                  this.scrollBorder.x = border[i];
+                  this.page = i;
+                  break;
                 }
               }
             }
+          }
         }
 
-        getScrollBorder = proxy(getScrollBorder,this);
+        getScrollBorder = proxy(getScrollBorder, this);
 
-        if(irregularBorder && irregularBorder.length){
+        if (border && border.length) {
 
-          switch (direction){
+          switch (direction) {
             case "page":
-              this.scrollBorder.x = irregularBorder[pageNumber];
+              this.scrollBorder.x = border[pageNumber];
               this.page = pageNumber;
               break;
 
             case "left":
-              if ( page < this.pagesCount - 1 ) {
-                getScrollBorder(); 
+              if (page < this.pagesCount - 1) {
+                getScrollBorder();
               }
-            break; 
+              break;
 
             case "right":
-              if ( page > 0 ) {  
+              if (page > 0) {
                 getScrollBorder();
               }
               break;
 
             default:
               this.scrollBorder.x = 0;
-              this.page           = 0;
+              this.page = 0;
               break;
           }
           return;
         }
-
-        // switch ( direction ) {
-
-        //   case "left":
-        //     if ( page < this.pagesCount - 1 ) {
-        //       this.scrollBorder.x = this.scrollBorder.x + width + borderBetweenPages;
-        //       this.page++;
-        //     }
-        //     break;
-
-        //   case "right":
-        //     if ( page > 0 ) {
-        //       this.scrollBorder.x = this.scrollBorder.x - width - borderBetweenPages;
-        //       this.page--;
-        //     }
-        //     break;
-
-        //   case "page":  
-        //     this.scrollBorder.x = (width + borderBetweenPages) * pageNumber;
-        //     this.page = pageNumber;
-        //     break;
-
-        //   default:
-        //     this.scrollBorder.x = 0;
-        //     this.page           = 0;
-        //     break;
-        // }
       },
 
       // ### On swipe end
@@ -644,7 +599,7 @@ if (!Array.prototype.find) {
         this.activeElement = this.pages[this.page * this.settings.itemsInPage];
 
         // Call onSwipeEnd callback function
-        this.settings.onSwipeEnd.call( this, this.container, this.activeElement, this.page);
+        this.settings.onSwipeEnd.call(this, this.container, this.activeElement, this.page);
       },
 
       // Jump to page
@@ -655,14 +610,14 @@ if (!Array.prototype.find) {
       // Takes:
       // Direction and pagenumber
 
-      _jumpToPage: function( options, pageNumber ) {
+      _jumpToPage: function(options, pageNumber) {
 
-        if ( options ) {
-          this._calcNewPage( options, pageNumber );
+        if (options) {
+          this._calcNewPage(options, pageNumber);
         }
 
         this._scroll({
-          x: - this.scrollBorder.x
+          x: -this.scrollBorder.x
         });
       },
 
@@ -674,10 +629,10 @@ if (!Array.prototype.find) {
       // Takes:
       // Direction and pagenumber
 
-      _scrollToPage: function( options, pageNumber ) {
+      _scrollToPage: function(options, pageNumber) {
         this.preventScroll = true;
 
-        if ( options ) this._calcNewPage( options, pageNumber );
+        if (options) this._calcNewPage(options, pageNumber);
 
         this._animateScroll();
       },
@@ -689,10 +644,10 @@ if (!Array.prototype.find) {
       // Takes:
       // x and y values to go with
 
-      _scrollWithTransform: function ( coordinates ) {
-        var style = "translateX(" + coordinates.x + "px)" ;
+      _scrollWithTransform: function(coordinates) {
+        var style = "translateX(" + coordinates.x + "px)";
 
-        setStyles( this.pageContainer, {
+        setStyles(this.wrap, {
           "-webkit-transform": style,
           "-moz-transform": style,
           "-ms-transform": style,
@@ -701,8 +656,6 @@ if (!Array.prototype.find) {
         });
 
         this.activeElement = this.pages[this.page * this.settings.itemsInPage];
-        this.settings.onScrollStart.call( this, this.container, this.activeElement, this.page );
-
       },
 
       // ### Animated scroll with translate support
@@ -710,10 +663,10 @@ if (!Array.prototype.find) {
       _animateScrollWithTransform: function() {
 
         var style = "transform " + this.settings.duration + "ms ease-out",
-            container = this.container,
-            afterScrollTransform = this._afterScrollTransform;
+          container = this.container,
+          afterScrollTransform = this._afterScrollTransform;
 
-        setStyles( this.pageContainer, {
+        setStyles(this.wrap, {
           "-webkit-transition": "-webkit-" + style,
           "-moz-transition": "-moz-" + style,
           "-ms-transition": "-ms-" + style,
@@ -722,7 +675,7 @@ if (!Array.prototype.find) {
         });
         // after add Animated,then scroll ele
         this._scroll({
-          x: - this.scrollBorder.x
+          x: -this.scrollBorder.x
         });
 
         addEventListener(this.container, "webkitTransitionEnd", afterScrollTransform);
@@ -735,7 +688,7 @@ if (!Array.prototype.find) {
       _afterScrollTransform: function() {
 
         var container = this.container,
-            afterScrollTransform = this._afterScrollTransform;
+          afterScrollTransform = this._afterScrollTransform;
 
         this._onSwipeEnd();
 
@@ -744,7 +697,7 @@ if (!Array.prototype.find) {
         removeEventListener(container, "transitionend", afterScrollTransform);
         removeEventListener(container, "transitionEnd", afterScrollTransform);
 
-        setStyles( this.pageContainer, {
+        setStyles(this.wrap, {
           "-webkit-transition": "",
           "-moz-transition": "",
           "-ms-transition": "",
@@ -761,69 +714,54 @@ if (!Array.prototype.find) {
       // Takes:
       // x and y values to go with
 
-      _scrollWithoutTransform: function( coordinates ) {
-        var styles =  { "marginLeft": coordinates.x } ;
+      _scrollWithoutTransform: function(coordinates) {
+        var styles = {
+          "marginLeft": coordinates.x
+        };
 
-        setStyles(this.pageContainer, styles);
+        setStyles(this.wrap, styles);
       },
 
       // ### Animated scroll without translate support
 
       _animateScrollWithoutTransform: function() {
-        var property = "marginLeft" ,
-            value = - this.scrollBorder.x ;
+        var property = "marginLeft",
+          value = -this.scrollBorder.x;
 
-        animate( this.pageContainer, property, value, this.settings.duration, proxy( this._onSwipeEnd, this ));
+        animate(this.wrap, property, value, this.settings.duration, proxy(this._onSwipeEnd, this));
         this._onSwipeEnd();
       },
 
       // Public functions
       // ================
 
-      swipe: function( direction ) {
+      swipe: function(direction) {
         // Call onSwipeStart callback function
-        this._scrollToPage( direction );
-        this.settings.onSwipeStart.call( this, this.container, this.activeElement, this.page );
+        this._scrollToPage(direction);
+        this.settings.onSwipeStart.call(this, this.container, this.activeElement, this.page);
       },
 
-      updateInstance: function( settings,isInit ) {
-        var centerFir = 0,tempBorder=0;
+      updateInstance: function(settings, isInit) {
+
         settings = settings || {};
 
-        if ( typeof settings === "object" ) extend( this.settings, settings );
+        if (typeof settings === "object") extend(this.settings, settings);
 
-        this.pages = getElementsByClassName(this.settings.pageClass, this.pageContainer);
-
-        if (this.pages.length) {
-          this.pagesCount = this.pages.length;
-        } else {
-          throw new Error(errors.pages);
-        }
-
-        if(!this.settings.itemBorder.length){
-          centerFir = this.pages[0].offsetLeft + this.settings.itemWidth/2 - this.settings.wrapBorder/2;
-          this.settings.itemBorder.push(centerFir);
-          for (var i = 1; i < this.pagesCount; i++) {
-            tempBorder = centerFir+i*this.settings.itemWidth;
-            this.settings.itemBorder.push(tempBorder);
-          };
-        }
-
-        this.activeElement = this.pages[this.page * this.settings.itemsInPage];
-        if(isInit){
+        this.activeElement = this.pages[this.page];
+        if (isInit) {
           this._sizePages();
         }
-        
-        if ( this.settings.jumpToPage ) {
-          this.jumpToPage( settings.jumpToPage );
+
+        if (this.settings.jumpToPage) {
+          this.jumpToPage(settings.jumpToPage);
           delete this.settings.jumpToPage;
         }
 
-        if ( this.settings.scrollToPage!=undefined ) {
-          this.scrollToPage( this.settings.scrollToPage );
+        if (this.settings.scrollToPage != undefined) {
+          this.scrollToPage(this.settings.scrollToPage);
           delete this.settings.scrollToPage;
         }
-		
+
         if (this.settings.destroy) {
           this.destroy();
           delete this.settings.destroy;
@@ -847,51 +785,47 @@ if (!Array.prototype.find) {
 
       },
 
-      scrollToPage: function( page ) {
-        this._scrollToPage( "page", page);
+      scrollToPage: function(page) {
+        this._scrollToPage("page", page);
       },
 
-      jumpToPage: function( page ) {
-        this._jumpToPage( "page", page);
+      jumpToPage: function(page) {
+        this._jumpToPage("page", page);
       }
 
     });
 
-    window.instanceList=[];
+    window.instanceList = [];
 
-    if ( $ ) {
+    if ($) {
 
-        // Register jQuery plugin
-        $.fn.dragNav = function( settings ) {
+      // Register jQuery plugin
+      $.fn.dragNav = function(settings) {
 
-          settings = settings || {};
+        settings = settings || {};
 
-          this.each(function() {
-            var tempInstance = {};
-            var thisInstanceObj = window.instanceList.find(function(item){
-              return item.ele = $(this)
-            })
+        this.each(function() {
+          var tempInstance = {};
+          var thisInstanceObj = window.instanceList.find(function(item) {
+            return item.ele = $(this)
+          })
 
-            var instance = thisInstanceObj && thisInstanceObj.instance;
+          var instance = thisInstanceObj && thisInstanceObj.instance;
 
-            // check if instance already created
-            if ( instance ) {
-              instance.updateInstance( settings );
-            } else {
-              instance = new dragNav( this, settings );
-              tempInstance.instance = instance;
-              tempInstance.ele = $(this);
-              window.instanceList.push(tempInstance);
-            }
+          // check if instance already created
+          if (instance) {
+            instance.updateInstance(settings);
+          } else {
+            instance = new dragNav(this, settings);
+            tempInstance.instance = instance;
+            tempInstance.ele = $(this);
+            window.instanceList.push(tempInstance);
+          }
+        });
 
-            // check if should trigger swipe
-            if ( typeof settings === "string" ) instance.swipe( settings );
-
-          });
-
-          // jQuery functions should always return the instance
-          return this;
-        };
+        // jQuery functions should always return the instance
+        return this;
+      };
 
     }
 
@@ -899,12 +833,12 @@ if (!Array.prototype.find) {
 
   }
 
-  if ( typeof define == 'function' && typeof define.amd == 'object' && define.amd ) {
-      define(function() {
-        return init( win.jQuery || win.Zepto );
-      });
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    define(function() {
+      return init(win.jQuery || win.Zepto);
+    });
   } else {
-      win.dragNav = init( win.jQuery || win.Zepto );
+    win.dragNav = init(win.jQuery || win.Zepto);
   }
 
-})( window );
+})(window);

@@ -28,7 +28,7 @@
         line-height: 1;
         height: 1rem;
         white-space: nowrap;
-        width: 2000px;/*attention:initial width must exist*/
+        width: 2000px;/*attention:initial width*/
       }
 
       .item,.placeholder{
@@ -102,8 +102,8 @@
 
         // dragNav
         $("#wrap").dragNav({
-          pageClass:'item',
-          pageContainer:'.item-list',
+          itemClass:'item',
+          wrap:'.item-list',
           itemWidth: $('.item').width()
         });
       })
